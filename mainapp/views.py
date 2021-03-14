@@ -29,7 +29,7 @@ def products(request, category_id=None, page=1):
     else:
         products = Product.objects.all()
     per_page = 3
-    paginator = Paginator(products, per_page)
+    paginator = Paginator(products.order_by('price'), per_page)
     try:
         products_paginator = paginator.page(page)
     except PageNotAnInteger:
@@ -41,3 +41,4 @@ def products(request, category_id=None, page=1):
         'categories': ProductCategory.objects.all(), 'products': products_paginator
     }
     return render(request, 'mainapp/products.html', context)
+
