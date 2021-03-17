@@ -1,6 +1,8 @@
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, UserChangeForm
 from authapp.models import User
 from django import forms
+import hashlib
+import random
 
 class UserLoginForm(AuthenticationForm):
     class Meta:
@@ -31,6 +33,14 @@ class UserRegisterForm(UserCreationForm):
         for field_name, field in self.fields.items():
             field.widget.attrs['class'] = 'form-control py-4'
 
+    def save(self, commit=True):
+        user = super().save()
+        user.is_active = False
+        salt = hashlib.sha1(str(random.random()).encode('utf8')).hexdigest()
+        user.activation_key = hashlib.sha1(str(user.email + salt).encode('utf8')).hexdigest()
+        user.save()
+        return user
+
 
 class UserProfileForm(UserChangeForm):
     avatar = forms.ImageField(widget=forms.FileInput())
@@ -46,5 +56,9 @@ class UserProfileForm(UserChangeForm):
         self.fields['username'].widget.attrs['readonly'] = True
         self.fields['email'].widget.attrs['readonly'] = True
         self.fields['avatar'].widget.attrs['class'] = "custom-file-input"
+        
+
+
+
 
 
